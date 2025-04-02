@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define TOTAL_SLOTS 10
+
+typedef struct {
+    int slotNumber;
+    char vehicleOwner[50];
+    char contactNumber[15];
+    char vehicleNumber[20];
+    int isOccupied;
+} ParkingSlot;
+
+void initializeSlots(ParkingSlot slots[]) {
+    srand(time(NULL));  // Seed the random number generator
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
+        slots[i].slotNumber = i + 1;
+        if (rand() % 2 == 0) {  // Randomly decide if the slot is occupied or not
+            strcpy(slots[i].vehicleOwner, "RandomOwner");
+            strcpy(slots[i].contactNumber, "1234567890");
+            strcpy(slots[i].vehicleNumber, "ABC1234");
+            slots[i].isOccupied = 1;
+        } else {
+            strcpy(slots[i].vehicleOwner, "");
+            strcpy(slots[i].contactNumber, "");
+            strcpy(slots[i].vehicleNumber, "");
+            slots[i].isOccupied = 0;
+        }
+    }
+}
+
+void displaySlots(ParkingSlot slots[]) {
+    printf("Parking Slots Status:\n");
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
+        printf("Slot %d: %s\n", slots[i].slotNumber, slots[i].isOccupied ? "Occupied" : "Available");
+    }
+}
+
+int isDuplicateVehicle(ParkingSlot slots[], char vehicleNum[]) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
+        if (slots[i].isOccupied && strcmp(slots[i].vehicleNumber, vehicleNum) == 0) {
+            return 1;  // Vehicle number already exists
+        }
+    }
+    return 0;  // Vehicle number is unique
+}
+
+void addVehicle(ParkingSlot slots[]) {
+    int slot;
+    char owner[50];
+    char contact[15];
+    char vehicleNum[20];
+
+    printf("Enter slot number (1-%d): ", TOTAL_SLOTS);
+    scanf("%d", &slot);
+
+    if (slot < 1 || slot > TOTAL_SLOTS) {
+        printf("Invalid slot number!\n");
+        return;
+    }
+
+    if (slots[slot - 1].isOccupied) {
+        printf("Slot is already occupied!\n");
+        return;
+    }
+
+    printf("Enter vehicle owner's name: ");
+    scanf("%s", owner);
+    printf("Enter contact number: ");
+    scanf("%s", contact);
+    printf("Enter vehicle number: ");
+    scanf("%s", vehicleNum);
+
+    if (isDuplicateVehicle(slots, vehicleNum)) {
+        printf("Vehicle number already exists in another slot!\n");
+        return;
+    }
+
+    strcpy(slots[slot - 1].vehicleOwner, owner);
+    strcpy(slots[slot - 1].contactNumber, contact);
+    strcpy(slots[slot - 1].vehicleNumber, vehicleNum);
+    slots[slot - 1].isOccupied = 1;
+
+    printf("Vehicle added to slot %d!\n", slot);
+}
+
+void exitVehicle(ParkingSlot slots[]) {
+    char vehicleNum[20];
+    int found = 0;
+
+    printf("Enter vehicle number: ");
+    scanf("%s", vehicleNum);
+
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
+        if (slots[i].isOccupied && strcmp(slots[i].vehicleNumber, vehicleNum) == 0) {
+            slots[i].isOccupied = 0;
+            strcpy(slots[i].vehicleOwner, "");
+            strcpy(slots[i].contactNumber, "");
+            strcpy(slots[i].vehicleNumber, "");
+            printf("Vehicle removed from slot %d!\n", slots[i].slotNumber);
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Vehicle number not found in any slot!\n");
+    }
+}
+
+int main() {
+    ParkingSlot slots[TOTAL_SLOTS];
+    int choice;
+
+    initializeSlots(slots);
+
+    do {
+        printf("\nVehicle Parking System\n");
+        printf("1. Display Slots\n");
+        printf("2. Park a Vehicle\n");
+        printf("3. Remove a Vehicle\n");
+        printf("4. Exit from loop\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                displaySlots(slots);
+                break;
+            case 2:
+                addVehicle(slots);
+                break;
+            case 3:
+                exitVehicle(slots);
+                break;
+            case 4:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
